@@ -32,6 +32,7 @@ static int handle_local(struct parsedfile *, int, char *);
 static int handle_defuser(struct parsedfile *, int, char *);
 static int handle_defpass(struct parsedfile *, int, char *);
 static int make_netent(char *value, struct netent **ent);
+static int handle_fallback(struct parsedfile *, int, char *);
 
 int read_config (char *filename, struct parsedfile *config) {
 	FILE *conf;
@@ -152,6 +153,8 @@ static int handle_line(struct parsedfile *config, char *line, int lineno) {
 				handle_defpass(config, lineno, words[2]);
 			} else if (!strcmp(words[0], "local")) {
 				handle_local(config, lineno, words[2]);
+			} else if (!strcmp(words[0], "fallback")) {
+				handle_fallback(config, lineno, words[2]);
 			} else {
 				show_msg(MSGERR, "Invalid pair type (%s) specified "
 					   "on line %d in configuration file, "
@@ -481,6 +484,23 @@ static int handle_local(struct parsedfile *config, int lineno, char *value) {
 	(config->localnets) = ent;
 
 	return(0);
+}
+
+static int handle_fallback(struct parsedfile *config, int lineno, char *value) {
+    char *v = strsplit(NULL, &value, " ");
+    if (config->fallback != 0) {
+        show_msg(MSGERR, "Fallback may only be specified "
+                         "once in configuration file.\n",
+                         lineno, currentcontext->lineno);
+    } else {
+        if (!strcmp(v, "yes")) {
+            config->fallback = 1;
+        }
+        if (!strcmp(v, "no")) {
+            config->fallback = 0;
+        }
+    }
+    return 0;
 }
 
 /* Construct a netent given a string like                             */
