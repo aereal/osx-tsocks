@@ -1,0 +1,11 @@
+---
+language: objective-c
+before_install: 
+  - autoconf --version
+install:
+  - autoconf --verbose
+  - ./configure --prefix=$HOME/opt/tsocks
+  - make
+  - make install
+script:
+  - $HOME/opt/tsocks/bin/tsocks show
